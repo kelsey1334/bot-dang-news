@@ -21,7 +21,7 @@ Yêu cầu:
 
 - Chỉ có 1 thẻ H1 duy nhất, dưới 70 ký tự.
 
-- Sapo mở đầu ngay sau tiêu đề bài viết: dài 150–200 ký tự
+- Sapo mở đầu ngay sau tiêu đề bài viết: dài 150–200 ký tự.
 
 2. Thân bài:
 
@@ -30,22 +30,28 @@ Yêu cầu:
 ⚠️Lưu ý: Viết bằng tiếng Việt, giọng văn rõ ràng, thực tế, sâu sắc, Không thêm bất kỳ trích dẫn hoặc đường link nào, chỉ trả về nội dung bài viết.
 """
 
+def extract_h1_and_remove(content):
+    # Lấy H1 theo dạng markdown và loại bỏ H1 khỏi content
+    h1_md = re.search(r'^#\s*(.+)', content, re.MULTILINE)
+    if h1_md:
+        h1_text = h1_md.group(1).strip()
+        content_wo_h1 = re.sub(r'^#\s*.+\n?', '', content, count=1, flags=re.MULTILINE)
+        return h1_text, content_wo_h1
+    # Hoặc dạng HTML H1
+    h1_html = re.search(r'<h1.*?>(.*?)</h1>', content, re.DOTALL | re.IGNORECASE)
+    if h1_html:
+        h1_text = h1_html.group(1).strip()
+        content_wo_h1 = re.sub(r'<h1.*?>.*?</h1>', '', content, count=1, flags=re.DOTALL | re.IGNORECASE)
+        return h1_text, content_wo_h1
+    # Nếu không có H1, lấy dòng đầu
+    first_line = content.split('\n', 1)[0].strip()[:70]
+    content_wo_first = content[len(first_line):].lstrip('\n')
+    return first_line, content_wo_first
+
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text("Gửi file Excel (.xlsx) theo cấu trúc:\n"
                                     "Sheet 'tai_khoan': website | username | password\n"
                                     "Sheet 'key_word': url_nguon | website | chuyen_muc (ID số)")
-
-def extract_h1_keyword(content):
-    # Lấy dòng đầu kiểu markdown heading hoặc HTML
-    import re
-    h1_md = re.search(r'^#\s*(.+)', content, re.MULTILINE)
-    if h1_md:
-        return h1_md.group(1).strip()
-    h1_html = re.search(r'<h1.*?>(.*?)</h1>', content, re.DOTALL | re.IGNORECASE)
-    if h1_html:
-        return h1_html.group(1).strip()
-    # Hoặc lấy dòng đầu
-    return content.split('\n', 1)[0].strip()[:70]
 
 async def handle_file(update: Update, context: ContextTypes.DEFAULT_TYPE):
     doc = update.message.document
@@ -82,8 +88,8 @@ async def handle_file(update: Update, context: ContextTypes.DEFAULT_TYPE):
             prompt = PROMPT_TEMPLATE.format(url=url_nguon)
             try:
                 content = write_article(prompt)  # content dạng markdown/text
-                h1_keyword = extract_h1_keyword(content)
-                html = markdown2.markdown(content)
+                h1_keyword, content_wo_h1 = extract_h1_and_remove(content)
+                html = markdown2.markdown(content_wo_h1)
                 html = format_headings_and_keywords(html, h1_keyword)
                 post_url = post_to_wordpress(website, username, password, html, chuyen_muc)
                 results.append(f"{website}: Đăng thành công ({post_url})")
