@@ -13,20 +13,21 @@ load_dotenv()
 TOKEN = os.getenv('TELEGRAM_TOKEN')
 
 PROMPT_TEMPLATE = """
-Bạn là một chuyên gia viết nội dung tin tức bóng đá chuẩn SEO. Viết một bài blog dài khoảng 800 từ chuẩn SEO, hãy vào url {url} để lấy xác định long tail keyword chính cho bài viết và lấy dữ liệu từ url này để viết bài, yêu cầu lấy đúng toàn bộ thông tin trong url để viết và không tự lấy thông cũ để thêm vào bài viết.
+Bạn là một chuyên gia viết nội dung tin tức bóng đá chuẩn SEO. Viết một bài blog dài khoảng 800 từ chuẩn SEO, hãy vào url {url} để lấy dữ liệu từ url này để viết bài, yêu cầu lấy đúng toàn bộ thông tin trong url để viết và không tự lấy thông cũ để thêm vào bài viết.
 
 Yêu cầu:
-1. Cấu trúc bài viết:
-- Chỉ có 1 thẻ H1 duy nhất, dưới 70 ký tự, chứa từ khóa chính
-- Sapo mở đầu ngay sau tiêu đề: bắt đầu bằng từ khóa chính, dài 150–200 ký tự
-2. Thân bài:
-- Có ít nhất 3 tiêu đề H2, mỗi H2 có 2-3 H3 bổ trợ, có thể có H4 nếu phù hợp
-3. Tối ưu từ khóa:
-- Mật độ 0.5% đến 0.8%
-- Đậm từ khóa chính
-- Viết bằng tiếng Việt, giọng văn rõ ràng, thực tế, sâu sắc
 
-⚠️ Không thêm bất kỳ trích dẫn hoặc đường link nào, chỉ trả về nội dung bài viết.
+1. Cấu trúc bài viết:
+
+- Chỉ có 1 thẻ H1 duy nhất, dưới 70 ký tự.
+
+- Sapo mở đầu ngay sau tiêu đề bài viết: dài 150–200 ký tự
+
+2. Thân bài:
+
+- Có ít nhất 3 tiêu đề H2, mỗi H2 có 2-3 H3 bổ trợ, có thể có H4 nếu phù hợp
+
+⚠️Lưu ý: Viết bằng tiếng Việt, giọng văn rõ ràng, thực tế, sâu sắc, Không thêm bất kỳ trích dẫn hoặc đường link nào, chỉ trả về nội dung bài viết.
 """
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
