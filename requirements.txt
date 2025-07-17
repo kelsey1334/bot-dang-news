@@ -4,3 +4,4 @@ openpyxl
 requests
 google-generativeai
 python-dotenv
+markdown2
