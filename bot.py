@@ -7,6 +7,7 @@ from utils.gemini_api import write_article
 from utils.wordpress_poster import post_to_wordpress
 from utils.formatter import format_headings_and_keywords
 import markdown2
+import re
 from dotenv import load_dotenv
 
 load_dotenv()
