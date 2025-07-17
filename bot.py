@@ -29,6 +29,9 @@ Yêu cầu:
 
 - Có ít nhất 3 tiêu đề H2, mỗi H2 có 2-3 H3 bổ trợ, có thể có H4 nếu phù hợp
 
+3. Vấn đề nội dung
+- Nếu trong url đấy có nội dung về lịch trình hay một time line hay một thống kê nào đó thì hãy tạo một bảng có định chuẩn để tôi copy và đăng lên wordpress không bị lỗi, không được tạo bảng bằng kiểu kí tự dạng như thế này: | :————– | :—————– | :——- |.
+
 ⚠️Lưu ý: Viết bằng tiếng Việt, giọng văn rõ ràng, thực tế, sâu sắc. bắt đầu bài viết ngay lập tức, không có lời nói đầu và kết bài không thêm bất kỳ trích dẫn hoặc đường link nào, chỉ trả về nội dung bài viết.
 """
 
