@@ -6,6 +6,9 @@ from utils.excel_parser import parse_excel
 from utils.gemini_api import write_article
 from utils.wordpress_poster import post_to_wordpress
 from utils.formatter import format_headings_and_keywords
+from utils.image_utils import (
+    get_headline_img, download_resize_image, translate_alt, upload_featured_image
+)
 import markdown2
 import re
 from dotenv import load_dotenv
@@ -32,27 +35,29 @@ Yêu cầu:
 """
 
 def extract_h1_and_remove(content):
-    # 1. Tìm H1 dạng markdown "# ..."
+    """
+    Trích xuất H1 đầu tiên (markdown hoặc HTML), trả về (h1, content đã loại bỏ H1)
+    """
     h1_md = re.search(r'^#\s*(.+)', content, re.MULTILINE)
     if h1_md:
         h1_text = h1_md.group(1).strip()
         content_wo_h1 = re.sub(r'^#\s*.+\n?', '', content, count=1, flags=re.MULTILINE)
         return h1_text, content_wo_h1
-    # 2. Tìm H1 dạng HTML
     h1_html = re.search(r'<h1.*?>(.*?)</h1>', content, re.DOTALL | re.IGNORECASE)
     if h1_html:
         h1_text = h1_html.group(1).strip()
         content_wo_h1 = re.sub(r'<h1.*?>.*?</h1>', '', content, count=1, flags=re.DOTALL | re.IGNORECASE)
         return h1_text, content_wo_h1
-    # 3. Nếu không có, lấy dòng đầu
     first_line = content.split('\n', 1)[0].strip()[:70]
     content_wo_first = content[len(first_line):].lstrip('\n')
     return first_line, content_wo_first
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    await update.message.reply_text("Gửi file Excel (.xlsx) theo cấu trúc:\n"
-                                    "Sheet 'tai_khoan': website | username | password\n"
-                                    "Sheet 'key_word': url_nguon | website | chuyen_muc (ID số)")
+    await update.message.reply_text(
+        "Gửi file Excel (.xlsx) theo cấu trúc:\n"
+        "Sheet 'tai_khoan': website | username | password\n"
+        "Sheet 'key_word': url_nguon | website | chuyen_muc (ID số)"
+    )
 
 async def handle_file(update: Update, context: ContextTypes.DEFAULT_TYPE):
     doc = update.message.document
@@ -88,14 +93,29 @@ async def handle_file(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
             prompt = PROMPT_TEMPLATE.format(url=url_nguon)
             try:
-                content = write_article(prompt)  # content dạng markdown/text
-                h1_keyword, content_wo_h1 = extract_h1_and_remove(content)  # Lấy và lưu giá trị H1 trước khi xoá
-
+                # Viết bài bằng AI
+                content = write_article(prompt)
+                h1_keyword, content_wo_h1 = extract_h1_and_remove(content)
                 html = markdown2.markdown(content_wo_h1)
                 html = format_headings_and_keywords(html, h1_keyword)
-                # --> Sửa ở đây: truyền rõ title lấy từ h1_keyword
+
+                # ==== XỬ LÝ ẢNH THUMBNAIL ====
+                src_img, alt_img = get_headline_img(url_nguon)
+                featured_media_id = None
+                if src_img:
+                    img_path = f"/tmp/thumb_{idx}.jpg"
+                    download_resize_image(src_img, img_path)
+                    alt_vi = translate_alt(alt_img) if alt_img else ""
+                    try:
+                        featured_media_id = upload_featured_image(
+                            website, username, password, img_path, alt_vi
+                        )
+                    except Exception as e:
+                        print(f"Lỗi upload ảnh thumbnail: {e}")
+                        featured_media_id = None
+
                 post_url = post_to_wordpress(
-                    website, username, password, html, chuyen_muc, title=h1_keyword
+                    website, username, password, html, chuyen_muc, h1_keyword, featured_media_id
                 )
                 results.append(f"{website}: Đăng thành công ({post_url})")
             except Exception as e:
