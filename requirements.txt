@@ -8,3 +8,4 @@ markdown2
 beautifulsoup4
 pillow
 googletrans==4.0.0rc1
+unidecode
