@@ -4,6 +4,8 @@ from PIL import Image
 from io import BytesIO
 import os
 from googletrans import Translator
+import re
+import unidecode
 
 def get_headline_img(url):
     resp = requests.get(url, timeout=10)
