@@ -90,3 +90,25 @@ def add_logo_to_image(img_path, logo_url, out_path, padding=20):
     final_img = base_img.convert("RGB")
     final_img.save(out_path, format="JPEG")
     return out_path
+def add_banner_to_image(img_path, banner_url, out_path):
+    from PIL import Image
+    import requests
+    from io import BytesIO
+
+    # Mở ảnh chính (thumbnail)
+    base_img = Image.open(img_path).convert("RGBA")
+    W, H = base_img.size  # 800x400
+
+    # Tải banner và resize (nếu cần)
+    resp = requests.get(banner_url, timeout=10)
+    banner = Image.open(BytesIO(resp.content)).convert("RGBA")
+    banner = banner.resize((W, 40), Image.LANCZOS)  # Đảm bảo đúng kích thước 800x40
+
+    # Vị trí: sát dưới cùng
+    x = 0
+    y = H - 40
+
+    base_img.paste(banner, (x, y), mask=banner)
+    final_img = base_img.convert("RGB")
+    final_img.save(out_path, format="JPEG")
+    return out_path
