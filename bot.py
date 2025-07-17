@@ -5,6 +5,8 @@ from telegram.ext import ApplicationBuilder, CommandHandler, MessageHandler, Con
 from utils.excel_parser import parse_excel
 from utils.gemini_api import write_article
 from utils.wordpress_poster import post_to_wordpress
+from utils.formatter import format_headings_and_keywords
+import markdown2
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -31,6 +33,18 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text("Gửi file Excel (.xlsx) theo cấu trúc:\n"
                                     "Sheet 'tai_khoan': website | username | password\n"
                                     "Sheet 'key_word': url_nguon | website | chuyen_muc (ID số)")
+
+def extract_h1_keyword(content):
+    # Lấy dòng đầu kiểu markdown heading hoặc HTML
+    import re
+    h1_md = re.search(r'^#\s*(.+)', content, re.MULTILINE)
+    if h1_md:
+        return h1_md.group(1).strip()
+    h1_html = re.search(r'<h1.*?>(.*?)</h1>', content, re.DOTALL | re.IGNORECASE)
+    if h1_html:
+        return h1_html.group(1).strip()
+    # Hoặc lấy dòng đầu
+    return content.split('\n', 1)[0].strip()[:70]
 
 async def handle_file(update: Update, context: ContextTypes.DEFAULT_TYPE):
     doc = update.message.document
@@ -66,8 +80,11 @@ async def handle_file(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
             prompt = PROMPT_TEMPLATE.format(url=url_nguon)
             try:
-                content = write_article(prompt)
-                post_url = post_to_wordpress(website, username, password, content, chuyen_muc)
+                content = write_article(prompt)  # content dạng markdown/text
+                h1_keyword = extract_h1_keyword(content)
+                html = markdown2.markdown(content)
+                html = format_headings_and_keywords(html, h1_keyword)
+                post_url = post_to_wordpress(website, username, password, html, chuyen_muc)
                 results.append(f"{website}: Đăng thành công ({post_url})")
             except Exception as e:
                 results.append(f"{website}: Lỗi {e}")
@@ -78,7 +95,6 @@ async def handle_file(update: Update, context: ContextTypes.DEFAULT_TYPE):
 def main():
     app = ApplicationBuilder().token(TOKEN).build()
     app.add_handler(CommandHandler("start", start))
-    # Dùng filters.Document.ALL, tự kiểm tra trong hàm
     app.add_handler(MessageHandler(filters.Document.ALL, handle_file))
     app.run_polling()
 
