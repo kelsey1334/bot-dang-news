@@ -1,11 +1,7 @@
 import requests
 from requests.auth import HTTPBasicAuth
-import re
 
-def post_to_wordpress(url, username, password, html_content, category_id):
-    # Lấy title từ H1 (nếu có)
-    h1_match = re.search(r'<h1.*?>(.*?)</h1>', html_content, re.DOTALL | re.IGNORECASE)
-    title = h1_match.group(1).strip() if h1_match else "Bài viết tự động"
+def post_to_wordpress(url, username, password, html_content, category_id, title):
     post = {
         "title": title,
         "content": html_content,
