@@ -108,7 +108,7 @@ async def handle_file(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 h1_keyword, content_wo_h1 = extract_h1_and_remove(content)
                 html = markdown2.markdown(content_wo_h1)
                 html = format_headings_and_keywords(html, h1_keyword)
-
+                html = clean_html_trailing_markdown(html)
                 # ==== XỬ LÝ ẢNH THUMBNAIL ====
                 src_img, alt_img = get_headline_img(url_nguon)
                 featured_media_id = None
