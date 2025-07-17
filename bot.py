@@ -6,9 +6,7 @@ from utils.excel_parser import parse_excel
 from utils.gemini_api import write_article
 from utils.wordpress_poster import post_to_wordpress
 from utils.formatter import format_headings_and_keywords
-from utils.image_utils import (
-    get_headline_img, download_resize_image, translate_alt, upload_featured_image
-)
+from utils.image_utils import get_headline_img, download_resize_image, translate_alt, upload_featured_image, to_slug
 import markdown2
 import re
 from dotenv import load_dotenv
