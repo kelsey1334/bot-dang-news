@@ -103,9 +103,10 @@ async def handle_file(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 src_img, alt_img = get_headline_img(url_nguon)
                 featured_media_id = None
                 if src_img:
-                    img_path = f"/tmp/thumb_{idx}.jpg"
-                    download_resize_image(src_img, img_path)
                     alt_vi = translate_alt(alt_img) if alt_img else ""
+                    slug = to_slug(alt_vi) if alt_vi else f"thumb-{idx}"
+                    img_path = f"/tmp/{slug}.jpg"
+                    download_resize_image(src_img, img_path)
                     try:
                         featured_media_id = upload_featured_image(
                             website, username, password, img_path, alt_vi
