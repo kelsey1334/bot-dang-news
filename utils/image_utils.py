@@ -4,6 +4,7 @@ from PIL import Image
 from io import BytesIO
 import os
 from deep_translator import GoogleTranslator
+from PIL import Image
 import re
 import unidecode
 
@@ -59,3 +60,33 @@ def upload_featured_image(wp_url, username, password, img_path, alt_text):
     resp.raise_for_status()
     resp_json = resp.json()
     return resp_json['id']
+def add_logo_to_image(img_path, logo_url, out_path, padding=20):
+    # img_path: file ảnh nền (jpg)
+    # logo_url: url logo png
+    # out_path: file ảnh sau khi chèn logo
+
+    import requests
+    from io import BytesIO
+
+    # Mở ảnh chính
+    base_img = Image.open(img_path).convert("RGBA")
+    W, H = base_img.size  # 800x400
+
+    # Tải và resize logo
+    resp = requests.get(logo_url, timeout=10)
+    logo = Image.open(BytesIO(resp.content)).convert("RGBA")
+    # Logo = 2/10 chiều ngang, 2/10 chiều dọc
+    logo_w = int(W * 0.2)
+    logo_h = int(H * 0.2)
+    logo = logo.resize((logo_w, logo_h), Image.LANCZOS)
+
+    # Tính toạ độ chèn (padding từ trái và trên)
+    x = padding
+    y = padding
+
+    # Dán logo vào ảnh
+    base_img.paste(logo, (x, y), mask=logo)
+    # Nếu bạn muốn ảnh đầu ra là jpg (RGB)
+    final_img = base_img.convert("RGB")
+    final_img.save(out_path, format="JPEG")
+    return out_path
