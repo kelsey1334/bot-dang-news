@@ -6,7 +6,7 @@ from utils.excel_parser import parse_excel
 from utils.gemini_api import write_article
 from utils.wordpress_poster import post_to_wordpress
 from utils.formatter import format_headings_and_keywords, clean_html_trailing_markdown
-from utils.image_utils import get_headline_img, download_resize_image, translate_alt, upload_featured_image, to_slug, add_logo_to_image
+from utils.image_utils import get_headline_img, download_resize_image, translate_alt, upload_featured_image, to_slug, add_logo_to_image, add_banner_to_image
 import markdown2
 import re
 from dotenv import load_dotenv
@@ -45,9 +45,6 @@ Yêu cầu:
 """
 
 def extract_h1_and_remove(content):
-    """
-    Trích xuất H1 đầu tiên (markdown hoặc HTML), trả về (h1, content đã loại bỏ H1)
-    """
     h1_md = re.search(r'^#\s*(.+)', content, re.MULTILINE)
     if h1_md:
         h1_text = h1_md.group(1).strip(' #*-')
@@ -65,7 +62,7 @@ def extract_h1_and_remove(content):
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text(
         "Gửi file Excel (.xlsx) theo cấu trúc:\n"
-        "Sheet 'tai_khoan': website | username | password | logo_url\n"
+        "Sheet 'tai_khoan': website | username | password | logo_url | banner_url\n"
         "Sheet 'key_word': url_nguon | website | chuyen_muc (ID số)"
     )
 
@@ -101,6 +98,7 @@ async def handle_file(update: Update, context: ContextTypes.DEFAULT_TYPE):
             username = acc['username']
             password = acc['password']
             logo_url = acc['logo_url'] if 'logo_url' in acc else None
+            banner_url = acc['banner_url'] if 'banner_url' in acc else None
 
             prompt = PROMPT_TEMPLATE.format(url=url_nguon)
             try:
@@ -123,6 +121,11 @@ async def handle_file(update: Update, context: ContextTypes.DEFAULT_TYPE):
                     if logo_url and logo_url.startswith("http"):
                         out_path = f"/tmp/{slug}_logo.jpg"
                         add_logo_to_image(img_path, logo_url, out_path)
+                        img_path = out_path
+                    # Nếu có banner_url thì chèn banner
+                    if banner_url and banner_url.startswith("http"):
+                        out_path = f"/tmp/{slug}_banner.jpg"
+                        add_banner_to_image(img_path, banner_url, out_path)
                         img_path = out_path
                     try:
                         featured_media_id = upload_featured_image(
