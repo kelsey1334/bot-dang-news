@@ -45,20 +45,17 @@ Yêu cầu:
 """
 
 def extract_h1_and_remove(content):
-    """
-    Trích xuất H1 đầu tiên (markdown hoặc HTML), trả về (h1, content đã loại bỏ H1)
-    """
     h1_md = re.search(r'^#\s*(.+)', content, re.MULTILINE)
     if h1_md:
-        h1_text = h1_md.group(1).strip()
+        h1_text = h1_md.group(1).strip(' #*-')
         content_wo_h1 = re.sub(r'^#\s*.+\n?', '', content, count=1, flags=re.MULTILINE)
         return h1_text, content_wo_h1
     h1_html = re.search(r'<h1.*?>(.*?)</h1>', content, re.DOTALL | re.IGNORECASE)
     if h1_html:
-        h1_text = h1_html.group(1).strip()
+        h1_text = h1_html.group(1).strip(' #*-')
         content_wo_h1 = re.sub(r'<h1.*?>.*?</h1>', '', content, count=1, flags=re.DOTALL | re.IGNORECASE)
         return h1_text, content_wo_h1
-    first_line = content.split('\n', 1)[0].strip()[:70]
+    first_line = content.split('\n', 1)[0].strip(' #*-')[:70]
     content_wo_first = content[len(first_line):].lstrip('\n')
     return first_line, content_wo_first
 
