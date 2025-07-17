@@ -32,19 +32,19 @@ Yêu cầu:
 """
 
 def extract_h1_and_remove(content):
-    # Lấy H1 theo dạng markdown và loại bỏ H1 khỏi content
+    # 1. Tìm H1 dạng markdown "# ..."
     h1_md = re.search(r'^#\s*(.+)', content, re.MULTILINE)
     if h1_md:
         h1_text = h1_md.group(1).strip()
         content_wo_h1 = re.sub(r'^#\s*.+\n?', '', content, count=1, flags=re.MULTILINE)
         return h1_text, content_wo_h1
-    # Hoặc dạng HTML H1
+    # 2. Tìm H1 dạng HTML
     h1_html = re.search(r'<h1.*?>(.*?)</h1>', content, re.DOTALL | re.IGNORECASE)
     if h1_html:
         h1_text = h1_html.group(1).strip()
         content_wo_h1 = re.sub(r'<h1.*?>.*?</h1>', '', content, count=1, flags=re.DOTALL | re.IGNORECASE)
         return h1_text, content_wo_h1
-    # Nếu không có H1, lấy dòng đầu
+    # 3. Nếu không có, lấy dòng đầu
     first_line = content.split('\n', 1)[0].strip()[:70]
     content_wo_first = content[len(first_line):].lstrip('\n')
     return first_line, content_wo_first
