@@ -39,9 +39,7 @@ def download_resize_image(img_url, save_path):
 def translate_alt(text):
     if not text.strip():
         return ""
-    translator = Translator()
-    vi = translator.translate(text, dest='vi').text
-    return vi
+    return GoogleTranslator(source='auto', target='vi').translate(text)
     
 def to_slug(text):
     text = unidecode.unidecode(text)
