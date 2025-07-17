@@ -40,7 +40,15 @@ def translate_alt(text):
     translator = Translator()
     vi = translator.translate(text, dest='vi').text
     return vi
-
+    
+def to_slug(text):
+    text = unidecode.unidecode(text)
+    text = text.lower()
+    text = re.sub(r'[^a-z0-9]+', '-', text)
+    text = re.sub(r'-+', '-', text)
+    text = text.strip('-')
+    return text[:50] or "image"
+    
 def upload_featured_image(wp_url, username, password, img_path, alt_text):
     media_api = wp_url.rstrip('/') + "/wp-json/wp/v2/media"
     with open(img_path, 'rb') as img_file:
