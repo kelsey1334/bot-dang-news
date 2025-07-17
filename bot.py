@@ -89,10 +89,14 @@ async def handle_file(update: Update, context: ContextTypes.DEFAULT_TYPE):
             prompt = PROMPT_TEMPLATE.format(url=url_nguon)
             try:
                 content = write_article(prompt)  # content dạng markdown/text
-                h1_keyword, content_wo_h1 = extract_h1_and_remove(content)
+                h1_keyword, content_wo_h1 = extract_h1_and_remove(content)  # Lấy và lưu giá trị H1 trước khi xoá
+
                 html = markdown2.markdown(content_wo_h1)
                 html = format_headings_and_keywords(html, h1_keyword)
-                post_url = post_to_wordpress(website, username, password, html, chuyen_muc)
+                # --> Sửa ở đây: truyền rõ title lấy từ h1_keyword
+                post_url = post_to_wordpress(
+                    website, username, password, html, chuyen_muc, title=h1_keyword
+                )
                 results.append(f"{website}: Đăng thành công ({post_url})")
             except Exception as e:
                 results.append(f"{website}: Lỗi {e}")
