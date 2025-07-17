@@ -1,24 +1,14 @@
 import requests
 from requests.auth import HTTPBasicAuth
-import re
 
-def extract_h1(content):
-    # Tìm H1 ở dạng markdown (# Tiêu đề)
-    match = re.search(r'^\s*#\s+(.{1,70})', content, re.MULTILINE)
-    if match:
-        return match.group(1).strip()
-    # Hoặc tìm <h1>Tiêu đề</h1>
-    match = re.search(r'<h1[^>]*>(.{1,70})<\/h1>', content, re.IGNORECASE)
-    if match:
-        return match.group(1).strip()
-    # Nếu không có, lấy dòng đầu tiên tối đa 70 ký tự
-    return content.split('\n', 1)[0].strip()[:70]
-
-def post_to_wordpress(url, username, password, content, category_id):
-    title = extract_h1(content)
+def post_to_wordpress(url, username, password, html_content, category_id):
+    # Lấy title từ H1 (nếu có)
+    import re
+    h1_match = re.search(r'<h1.*?>(.*?)</h1>', html_content, re.DOTALL | re.IGNORECASE)
+    title = h1_match.group(1).strip() if h1_match else "Bài viết tự động"
     post = {
         "title": title,
-        "content": content,
+        "content": html_content,
         "status": "publish",
         "categories": [int(category_id)]
     }
