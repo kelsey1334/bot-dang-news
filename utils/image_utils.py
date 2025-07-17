@@ -3,7 +3,7 @@ from bs4 import BeautifulSoup
 from PIL import Image
 from io import BytesIO
 import os
-from googletrans import Translator
+from deep_translator import GoogleTranslator
 import re
 import unidecode
 
