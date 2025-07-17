@@ -30,7 +30,7 @@ Yêu cầu:
 - Có ít nhất 3 tiêu đề H2, mỗi H2 có 2-3 H3 bổ trợ, có thể có H4 nếu phù hợp
 
 3. Các vấn đề trong nội dung
-- Nếu có lịch trình hay các dạng kiểu về time line hoặc thống kê về điều gì đó bạn có thể tạo ra một bảng để bài viết tối ưu trải nghiệm người dùng hơn.
+- Nếu có lịch trình hay các dạng kiểu về time line hoặc thống kê về điều gì đó bạn có thể tạo ra một bảng để bài viết và đăng lên wordpress tối ưu trải nghiệm người dùng hơn.
 
 ⚠️Lưu ý: Viết bằng tiếng Việt, giọng văn rõ ràng, thực tế, sâu sắc. bắt đầu bài viết ngay lập tức, không có lời nói đầu và kết bài không thêm bất kỳ trích dẫn hoặc đường link nào, chỉ trả về nội dung bài viết.
 """
