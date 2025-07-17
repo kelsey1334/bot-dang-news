@@ -1,15 +1,13 @@
 import os
 import tempfile
-import pandas as pd
 from telegram import Update
-from telegram.ext import ApplicationBuilder, CommandHandler, MessageHandler, filters, ContextTypes
+from telegram.ext import ApplicationBuilder, CommandHandler, MessageHandler, ContextTypes, filters
 from utils.excel_parser import parse_excel
 from utils.gemini_api import write_article
 from utils.wordpress_poster import post_to_wordpress
-
 from dotenv import load_dotenv
-load_dotenv()
 
+load_dotenv()
 TOKEN = os.getenv('TELEGRAM_TOKEN')
 
 PROMPT_TEMPLATE = """
@@ -30,12 +28,17 @@ Yêu cầu:
 """
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    await update.message.reply_text("Gửi file Excel (.xlsx) theo cấu trúc quy định:\n"
+    await update.message.reply_text("Gửi file Excel (.xlsx) theo cấu trúc:\n"
                                     "Sheet 'tai_khoan': website | username | password\n"
-                                    "Sheet 'key_word': url_nguon | website | chuyen_muc (ID)")
+                                    "Sheet 'key_word': url_nguon | website | chuyen_muc (ID số)")
 
 async def handle_file(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    file = await update.message.document.get_file()
+    doc = update.message.document
+    if not doc.file_name.lower().endswith('.xlsx'):
+        await update.message.reply_text("Chỉ nhận file Excel định dạng .xlsx")
+        return
+
+    file = await doc.get_file()
     with tempfile.NamedTemporaryFile(delete=False, suffix='.xlsx') as tf:
         file_path = tf.name
         await file.download_to_drive(custom_path=file_path)
@@ -75,7 +78,8 @@ async def handle_file(update: Update, context: ContextTypes.DEFAULT_TYPE):
 def main():
     app = ApplicationBuilder().token(TOKEN).build()
     app.add_handler(CommandHandler("start", start))
-    app.add_handler(MessageHandler(filters.Document.FILE_EXTENSION("xlsx"), handle_file))
+    # Dùng filters.Document.ALL, tự kiểm tra trong hàm
+    app.add_handler(MessageHandler(filters.Document.ALL, handle_file))
     app.run_polling()
 
 if __name__ == "__main__":
