@@ -1,5 +1,6 @@
 import os
 import tempfile
+import datetime
 from telegram import Update
 from telegram.ext import ApplicationBuilder, CommandHandler, MessageHandler, ContextTypes, filters
 from utils.excel_parser import parse_excel
@@ -73,6 +74,7 @@ async def handle_file(update: Update, context: ContextTypes.DEFAULT_TYPE):
             return
 
         results = []
+        website_links = dict()  # {website: [list post_url]}
         total = len(posts)
         for idx, post in posts.iterrows():
             stt = idx + 1
@@ -139,18 +141,27 @@ async def handle_file(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 )
                 await update.message.reply_text(f"✅ <b>{website}</b>: Đăng thành công!\n🔗 {post_url}", parse_mode='HTML')
                 
-                # Sinbyte index ngay sau khi đăng thành công
-                await update.message.reply_text("⚡ Đang gửi link bài vừa đăng lên Sinbyte ép index...")
-                ok, msg = ping_sinbyte(post_url)
-                if ok:
-                    await update.message.reply_text(f"🟢 Ép index Sinbyte thành công!")
-                else:
-                    await update.message.reply_text(f"🟠 Gửi link lên Sinbyte lỗi: {msg}")
+                # Gom link vào website_links
+                if website not in website_links:
+                    website_links[website] = []
+                website_links[website].append(post_url)
 
                 results.append(f"{website}: Đăng thành công ({post_url})")
             except Exception as e:
                 await update.message.reply_text(f"❌ <b>{website}</b>: Lỗi {e}", parse_mode='HTML')
                 results.append(f"{website}: Lỗi {e}")
+
+        # Sau khi xong, ép index cho từng website (batch 1 lần)
+        for website, urls in website_links.items():
+            now = datetime.datetime.now().strftime("%H-%M-%d-%m-%Y")
+            dripfeed = f"Noridc {now} {website}"
+            name = website
+            await update.message.reply_text(f"⚡ Đang gửi batch {len(urls)} link vừa đăng của {website} lên Sinbyte ép index...")
+            ok, msg = ping_sinbyte(urls, name, dripfeed)
+            if ok:
+                await update.message.reply_text(f"🟢 Sinbyte: Ép index thành công cho {website}!")
+            else:
+                await update.message.reply_text(f"🟠 Sinbyte: Gửi batch link {website} lỗi: {msg}")
 
         await update.message.reply_text("📝 Đã hoàn thành tất cả công việc.")
         os.unlink(file_path)
