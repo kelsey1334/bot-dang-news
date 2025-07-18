@@ -6,7 +6,7 @@ from utils.excel_parser import parse_excel
 from utils.gemini_api import write_article
 from utils.wordpress_poster import post_to_wordpress
 from utils.formatter import format_headings_and_keywords, clean_html_trailing_markdown
-from utils.image_utils import get_headline_img, download_resize_image, translate_alt, upload_featured_image, to_slug, add_logo_to_image, add_banner_to_image
+from utils.image_utils import get_headline_img, download_resize_image, translate_alt, upload_featured_image, to_slug, add_logo_to_image, add_banner_to_image, format_anchor_bold
 import markdown2
 import re
 from dotenv import load_dotenv
@@ -113,6 +113,7 @@ async def handle_file(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 h1_keyword, content_wo_h1 = extract_h1_and_remove(content)
                 html = markdown2.markdown(content_wo_h1)
                 html = format_headings_and_keywords(html, h1_keyword)
+                html = format_anchor_bold(html, anchor_text)
                 html = clean_html_trailing_markdown(html)
 
                 # ==== XỬ LÝ ẢNH THUMBNAIL ====
