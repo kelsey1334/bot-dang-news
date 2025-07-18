@@ -16,6 +16,7 @@ TOKEN = os.getenv('TELEGRAM_TOKEN')
 
 PROMPT_TEMPLATE = """
 Bạn là một chuyên gia viết nội dung tin tức bóng đá chuẩn SEO. Viết một bài blog dài khoảng 800 từ chuẩn SEO, hãy vào url {url} để lấy dữ liệu từ url này để viết bài, yêu cầu lấy đúng toàn bộ thông tin trong url để viết và không tự lấy thông cũ để thêm vào bài viết.
+Trong bài viết, hãy tự nhiên chèn một liên kết nội bộ (internal link) với anchor text: "{anchor_text}" và url là: {url_anchor} ở một vị trí phù hợp (không phải ở đầu hoặc cuối bài, không được lặp lại), dùng đúng định dạng markdown [anchor_text]({url_anchor}).
 
 Yêu cầu:
 
@@ -63,7 +64,7 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text(
         "Gửi file Excel (.xlsx) theo cấu trúc:\n"
         "Sheet 'tai_khoan': website | username | password | logo_url | banner_url\n"
-        "Sheet 'key_word': url_nguon | website | chuyen_muc (ID số)"
+        "Sheet 'key_word': url_nguon | website | chuyen_muc | anchor | url_anchor"
     )
 
 async def handle_file(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -90,6 +91,8 @@ async def handle_file(update: Update, context: ContextTypes.DEFAULT_TYPE):
             url_nguon = post['url_nguon']
             website = post['website']
             chuyen_muc = int(post['chuyen_muc'])
+            anchor_text = post['anchor'] if 'anchor' in post else ''
+            url_anchor = post['url_anchor'] if 'url_anchor' in post else ''
             acc = accounts.loc[accounts['website'] == website]
             if acc.empty:
                 results.append(f"{website}: Không tìm thấy tài khoản")
@@ -100,9 +103,12 @@ async def handle_file(update: Update, context: ContextTypes.DEFAULT_TYPE):
             logo_url = acc['logo_url'] if 'logo_url' in acc else None
             banner_url = acc['banner_url'] if 'banner_url' in acc else None
 
-            prompt = PROMPT_TEMPLATE.format(url=url_nguon)
+            prompt = PROMPT_TEMPLATE.format(
+                url=url_nguon,
+                anchor_text=anchor_text,
+                url_anchor=url_anchor
+            )
             try:
-                # Viết bài bằng AI
                 content = write_article(prompt)
                 h1_keyword, content_wo_h1 = extract_h1_and_remove(content)
                 html = markdown2.markdown(content_wo_h1)
@@ -117,12 +123,10 @@ async def handle_file(update: Update, context: ContextTypes.DEFAULT_TYPE):
                     slug = to_slug(alt_vi) if alt_vi else f"thumb-{idx}"
                     img_path = f"/tmp/{slug}.jpg"
                     download_resize_image(src_img, img_path)
-                    # Nếu có logo_url thì chèn logo
                     if logo_url and logo_url.startswith("http"):
                         out_path = f"/tmp/{slug}_logo.jpg"
                         add_logo_to_image(img_path, logo_url, out_path)
                         img_path = out_path
-                    # Nếu có banner_url thì chèn banner
                     if banner_url and banner_url.startswith("http"):
                         out_path = f"/tmp/{slug}_banner.jpg"
                         add_banner_to_image(img_path, banner_url, out_path)
