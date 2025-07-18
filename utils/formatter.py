@@ -24,3 +24,21 @@ def clean_html_trailing_markdown(html):
     html = re.sub(r'^\s*[\*\-]\s*', '', html, flags=re.MULTILINE)       # Xoá * hoặc - đầu dòng
     html = re.sub(r'(?<!<em>)(?<!<strong>)\*(?!</em>)(?!</strong>)', '', html)  # Xoá * thừa không nằm trong <em>/<strong>
     return html
+def format_anchor_bold(html, anchor_text):
+    # In đậm anchor_text trong thẻ <a> bất kỳ trong bài viết
+    if not anchor_text.strip():
+        return html
+    # Tìm tất cả <a ...>anchor_text</a> (không phân biệt thuộc tính a)
+    def repl(match):
+        pre = match.group(1)
+        text = match.group(2)
+        post = match.group(3)
+        if anchor_text.lower() in text.lower():
+            # Tránh in đậm 2 lần
+            if '<strong>' in text:
+                return match.group(0)
+            return f"{pre}<strong>{text}</strong>{post}"
+        return match.group(0)
+    # Xử lý cả so khớp không phân biệt hoa/thường
+    pattern = r'(<a\b[^>]*>)(.*?)(</a>)'
+    return re.sub(pattern, repl, html, flags=re.DOTALL)
