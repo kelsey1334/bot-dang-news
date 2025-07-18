@@ -154,8 +154,8 @@ async def handle_file(update: Update, context: ContextTypes.DEFAULT_TYPE):
         # Sau khi xong, ép index cho từng website (batch 1 lần)
         for website, urls in website_links.items():
             now = datetime.datetime.now().strftime("%H-%M-%d-%m-%Y")
-            dripfeed = f"Noridc"
-            name = website
+            dripfeed = 1
+            name = f"Noridc {now} {website}"
             await update.message.reply_text(f"⚡ Đang gửi batch {len(urls)} link vừa đăng của {website} lên Sinbyte ép index...")
             ok, msg = ping_sinbyte(urls, name, dripfeed)
             if ok:
