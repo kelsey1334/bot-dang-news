@@ -8,6 +8,7 @@ from utils.wordpress_poster import post_to_wordpress
 from utils.formatter import format_headings_and_keywords, clean_html_trailing_markdown, format_anchor_bold
 from utils.image_utils import get_headline_img, download_resize_image, translate_alt, upload_featured_image, to_slug, add_logo_to_image, add_banner_to_image
 import re
+from utils.sinbyte_api import ping_sinbyte
 import markdown2
 from dotenv import load_dotenv
 
@@ -137,6 +138,15 @@ async def handle_file(update: Update, context: ContextTypes.DEFAULT_TYPE):
                     website, username, password, html, chuyen_muc, h1_keyword, featured_media_id
                 )
                 await update.message.reply_text(f"✅ <b>{website}</b>: Đăng thành công!\n🔗 {post_url}", parse_mode='HTML')
+                
+                # Sinbyte index ngay sau khi đăng thành công
+                await update.message.reply_text("⚡ Đang gửi link bài vừa đăng lên Sinbyte ép index...")
+                ok, msg = ping_sinbyte(post_url)
+                if ok:
+                    await update.message.reply_text(f"🟢 Ép index Sinbyte thành công!")
+                else:
+                    await update.message.reply_text(f"🟠 Gửi link lên Sinbyte lỗi: {msg}")
+
                 results.append(f"{website}: Đăng thành công ({post_url})")
             except Exception as e:
                 await update.message.reply_text(f"❌ <b>{website}</b>: Lỗi {e}", parse_mode='HTML')
