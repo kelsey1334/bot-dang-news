@@ -4,7 +4,7 @@ import os
 
 SINBYTE_APIKEY = os.getenv('SINBYTE_APIKEY')
 
-def ping_sinbyte(urls, name, dripfeed):
+def ping_sinbyte(urls, name, dripfeed=1):
     """
     Gửi 1 hoặc nhiều url lên Sinbyte API để ép index.
     :param urls: list các url (hoặc 1 url string)
