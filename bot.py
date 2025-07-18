@@ -53,24 +53,28 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
 async def handle_file(update: Update, context: ContextTypes.DEFAULT_TYPE):
     doc = update.message.document
     if not doc.file_name.lower().endswith('.xlsx'):
-        await update.message.reply_text("Chỉ nhận file Excel định dạng .xlsx")
+        await update.message.reply_text("❌ Chỉ nhận file Excel định dạng .xlsx")
         return
+
+    await update.message.reply_text("🗂️ Đang tải file Excel...")
 
     file = await doc.get_file()
     with tempfile.NamedTemporaryFile(delete=False, suffix='.xlsx') as tf:
         file_path = tf.name
         await file.download_to_drive(custom_path=file_path)
-        await update.message.reply_text("Đang xử lý file...")
+        await update.message.reply_text("🗂️ Đang đọc và phân tích file...")
 
         try:
             accounts, posts = parse_excel(file_path)
         except Exception as e:
-            await update.message.reply_text(f"Lỗi đọc file: {e}")
+            await update.message.reply_text(f"❌ Lỗi đọc file: {e}")
             os.unlink(file_path)
             return
 
         results = []
+        total = len(posts)
         for idx, post in posts.iterrows():
+            stt = idx + 1
             url_nguon = post['url_nguon']
             website = post['website']
             chuyen_muc = int(post['chuyen_muc'])
@@ -86,26 +90,30 @@ async def handle_file(update: Update, context: ContextTypes.DEFAULT_TYPE):
             logo_url = acc['logo_url'] if 'logo_url' in acc else None
             banner_url = acc['banner_url'] if 'banner_url' in acc else None
 
+            await update.message.reply_text(f"🌐 [{stt}/{total}] Đang xử lý website: <b>{website}</b>", parse_mode='HTML')
             prompt = PROMPT_TEMPLATE.format(
                 url=url_nguon,
                 anchor_text=anchor_text,
                 url_anchor=url_anchor
             )
             try:
+                await update.message.reply_text(f"🤖 Đang viết bài AI cho <b>{website}</b>...", parse_mode='HTML')
                 content = write_article(prompt)
                 h1_keyword, content_wo_h1 = extract_h1_and_remove(content)
+                await update.message.reply_text(f"🏷️ Đang xử lý format bài viết...", parse_mode='HTML')
                 html = markdown2.markdown(content_wo_h1)
                 html = format_headings_and_keywords(html, h1_keyword)
                 html = format_anchor_bold(html, anchor_text)
                 html = clean_html_trailing_markdown(html)
 
-                # ==== XỬ LÝ ẢNH THUMBNAIL ====
+                await update.message.reply_text("🖼️ Đang lấy ảnh đầu bài...")
                 src_img, alt_img = get_headline_img(url_nguon)
                 featured_media_id = None
                 if src_img:
                     alt_vi = translate_alt(alt_img) if alt_img else ""
                     slug = to_slug(alt_vi) if alt_vi else f"thumb-{idx}"
                     img_path = f"/tmp/{slug}.jpg"
+                    await update.message.reply_text("🎨 Đang resize/chèn logo/banner vào ảnh...")
                     download_resize_image(src_img, img_path)
                     if logo_url and logo_url.startswith("http"):
                         out_path = f"/tmp/{slug}_logo.jpg"
@@ -115,22 +123,26 @@ async def handle_file(update: Update, context: ContextTypes.DEFAULT_TYPE):
                         out_path = f"/tmp/{slug}_banner.jpg"
                         add_banner_to_image(img_path, banner_url, out_path)
                         img_path = out_path
+                    await update.message.reply_text("⬆️ Đang upload ảnh lên WordPress...")
                     try:
                         featured_media_id = upload_featured_image(
                             website, username, password, img_path, alt_vi
                         )
                     except Exception as e:
-                        print(f"Lỗi upload ảnh thumbnail: {e}")
+                        await update.message.reply_text(f"❌ Lỗi upload ảnh thumbnail: {e}")
                         featured_media_id = None
 
+                await update.message.reply_text("🚀 Đang đăng bài lên WordPress...")
                 post_url = post_to_wordpress(
                     website, username, password, html, chuyen_muc, h1_keyword, featured_media_id
                 )
+                await update.message.reply_text(f"✅ <b>{website}</b>: Đăng thành công!\n🔗 {post_url}", parse_mode='HTML')
                 results.append(f"{website}: Đăng thành công ({post_url})")
             except Exception as e:
+                await update.message.reply_text(f"❌ <b>{website}</b>: Lỗi {e}", parse_mode='HTML')
                 results.append(f"{website}: Lỗi {e}")
 
-        await update.message.reply_text("\n".join(results))
+        await update.message.reply_text("📝 Đã hoàn thành tất cả công việc.")
         os.unlink(file_path)
 
 def main():
