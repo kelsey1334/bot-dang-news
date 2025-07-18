@@ -3,13 +3,13 @@ from requests.structures import CaseInsensitiveDict
 import os
 
 SINBYTE_APIKEY = os.getenv('SINBYTE_APIKEY')
-SINBYTE_NAME = os.getenv('SINBYTE_NAME', 'Auto Index')
-SINBYTE_DRIPFEED = int(os.getenv('SINBYTE_DRIPFEED', 1))
 
-def ping_sinbyte(urls):
+def ping_sinbyte(urls, name, dripfeed):
     """
     Gửi 1 hoặc nhiều url lên Sinbyte API để ép index.
     :param urls: list các url (hoặc 1 url string)
+    :param name: tên chiến dịch (tốt nhất là tên website)
+    :param dripfeed: string, ví dụ: "Noridc 16-35-17-07-2025 mywebsite.com"
     :return: (True, resp.text) nếu thành công, (False, resp.text) nếu lỗi
     """
     if SINBYTE_APIKEY is None:
@@ -22,8 +22,8 @@ def ping_sinbyte(urls):
     headers["Content-Type"] = "application/json"
     data = {
         "apikey": SINBYTE_APIKEY,
-        "name": SINBYTE_NAME,
-        "dripfeed": SINBYTE_DRIPFEED,
+        "name": name,
+        "dripfeed": dripfeed,
         "urls": urls
     }
     try:
