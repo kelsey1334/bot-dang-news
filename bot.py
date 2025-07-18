@@ -21,27 +21,10 @@ Trong bài viết, hãy tự nhiên chèn một liên kết nội bộ (internal
 Yêu cầu:
 
 1. Cấu trúc bài viết:
-
 - Chỉ có 1 thẻ H1 duy nhất, dưới 70 ký tự.
-
 - Sapo mở đầu ngay sau tiêu đề bài viết: dài 150–200 ký tự.
-
-2. Thân bài:
-
-- Có ít nhất 3 tiêu đề H2, mỗi H2 có 2-3 H3 bổ trợ, có thể có H4 nếu phù hợp
-
-3. Vấn đề nội dung
-- Nếu trong url đấy có nội dung về lịch trình hay một time line hay một thống kê nào đó, thì hãy tạo một bảng có định chuẩn để tôi copy và đăng lên wordpress không bị lỗi, không được tạo bảng dạng như thế này: | Thành phố | Sân vận động | Sức chứa |
-| :————– | :—————– | :——- |
-| Basel | St. Jakob-Park | 38.500 |
-| Bern | Stadion Wankdorf | 32.000 |
-| Geneva | Stade de Genève | 30.000 |
-| Lucerne | Swissporarena | 16.800 |
-| Sion | Stade Tourbillon | 16.000 |
-| St. Gallen | kybunpark | 19.500 |
-| Thun | Stockhorn Arena | 10.000 |
-| Zurich | Letzigrund | 26.000 |.
-
+- Có ít nhất 3 tiêu đề H2, mỗi H2 có 2-3 H3 bổ trợ, có thể có H4 nếu phù hợp.
+- Yêu cầu phải sắp xếp các tiêu đề theo h1-h2-h3-h4... để đảm bảo cấu trúc chuẩn seo của bài viết.
 ⚠️Lưu ý: Viết bằng tiếng Việt, giọng văn rõ ràng, thực tế, sâu sắc. bắt đầu bài viết ngay lập tức, không có lời nói đầu và kết bài không thêm bất kỳ trích dẫn hoặc đường link nào, chỉ trả về nội dung bài viết.
 """
 
