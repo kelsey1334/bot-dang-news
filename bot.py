@@ -8,6 +8,7 @@ from utils.wordpress_poster import post_to_wordpress
 from utils.formatter import format_headings_and_keywords, clean_html_trailing_markdown, format_anchor_bold
 from utils.image_utils import get_headline_img, download_resize_image, translate_alt, upload_featured_image, to_slug, add_logo_to_image, add_banner_to_image
 import re
+import markdown2
 from dotenv import load_dotenv
 
 load_dotenv()
