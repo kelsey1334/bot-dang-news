@@ -5,9 +5,8 @@ from telegram.ext import ApplicationBuilder, CommandHandler, MessageHandler, Con
 from utils.excel_parser import parse_excel
 from utils.gemini_api import write_article
 from utils.wordpress_poster import post_to_wordpress
-from utils.formatter import format_headings_and_keywords, clean_html_trailing_markdown
-from utils.image_utils import get_headline_img, download_resize_image, translate_alt, upload_featured_image, to_slug, add_logo_to_image, add_banner_to_image, format_anchor_bold
-import markdown2
+from utils.formatter import format_headings_and_keywords, clean_html_trailing_markdown, format_anchor_bold
+from utils.image_utils import get_headline_img, download_resize_image, translate_alt, upload_featured_image, to_slug, add_logo_to_image, add_banner_to_image
 import re
 from dotenv import load_dotenv
 
